@@ -116,6 +116,31 @@ public:
     EvaluationState initial() const {
         return 0;
     }
+    
+    // Creates a graphviz visualization.
+    std::string graphviz(std::string const& name = "NFA") const {
+        std::stringstream ss;
+        ss << "digraph " << name << " {" << std::endl;
+        ss << "  rankdir=LR;" << std::endl;
+        ss << "  size=\"8,5\"" << std::endl;
+        ss << "  node [shape = doublecircle];";
+        for (auto a : _accepting_states) {
+            ss << " S" << a;
+        }
+        ss << ";" << std::endl;
+        ss << "  node [shape = circle];" << std::endl;
+        for (auto transitions : _transition_table) {
+            auto start = transitions.first;
+            for (auto t : transitions.second) {
+                auto end = t.destination;
+                ss << "  S" << start << " -> S" << end << " [ label = \"";
+                ss << t.filter;
+                ss << "\" ];" << std::endl;
+            }
+        }
+        ss << "}" << std::endl;
+        return ss.str();
+    }
 }; // DFA
 
 ////////////////////////////////////////////////////////////////////////////////
