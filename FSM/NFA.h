@@ -48,6 +48,9 @@ public:
     void add_transition(State source,
                         Filter const& filter,
                         State destination) {
+        if (filter.empty()) {
+            return;
+        }
         Transitions& transitions = _transition_table[source];
         for (Transition& t : transitions) {
             if (t.destination == destination && !t.epsilon) {
