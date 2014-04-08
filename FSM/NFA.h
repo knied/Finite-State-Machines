@@ -44,33 +44,40 @@ private:
     StateSet _accepting_states;
     
 public:
+    typedef enum {
+        Good,
+        EmptyFilter
+    } AddTransitionResult;
+    
     // Adds or extends a filtered transition to the NFA
-    void add_transition(State source,
-                        Filter const& filter,
-                        State destination) {
+    AddTransitionResult add_transition(State source,
+                                       Filter const& filter,
+                                       State destination) {
         if (filter.empty()) {
-            return;
+            return EmptyFilter;
         }
         Transitions& transitions = _transition_table[source];
         for (Transition& t : transitions) {
             if (t.destination == destination && !t.epsilon) {
                 t.filter += filter;
-                return;
+                return Good;
             }
         }
         transitions.push_back({ destination, false, filter });
+        return Good;
     }
     
     // Adds an epsilon transition to the NFA
-    void add_transition(State source,
-                        State destination) {
+    AddTransitionResult add_transition(State source,
+                                       State destination) {
         Transitions& transitions = _transition_table[source];
         for (Transition& t : transitions) {
             if (t.destination == destination && t.epsilon) {
-                return;
+                return Good;
             }
         }
         transitions.push_back({ destination, true, Filter() });
+        return Good;
     }
     
     // Sets the set of accepting states.

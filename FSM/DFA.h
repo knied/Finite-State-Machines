@@ -89,35 +89,39 @@ public:
         }
     }
     
+    typedef enum {
+        Good,
+        EmptyFilter,
+        ConflictingFilters
+    } AddTransitionResult;
+    
     // Adds or extends an existing transition. In case of a conflict with a pre
-    // existing transition, only the non conflicting parts of the filter will
-    // be inserted.
-    void add_transition(State source,
-                        Filter filter,
-                        State destination) {
+    // existing transition, no changes will be applied.
+    AddTransitionResult add_transition(State source,
+                                       Filter filter,
+                                       State destination) {
         if (filter.empty()) {
-            return;
+            return EmptyFilter;
         }
+        
         Transitions& transitions = _transition_table[source];
         
         // check for conflicts
         for (Transition& t : transitions) {
             if (t.destination != destination && intersecting(t.filter, filter)) {
-                filter -= t.filter; // TODO: Some warning would be nice...
+                return ConflictingFilters;
             }
-        }
-        if (filter.empty()) {
-            return;
         }
         
         // add transition
         for (Transition& t : transitions) {
             if (t.destination == destination) {
                 t.filter += filter;
-                return;
+                return Good;
             }
         }
         transitions.push_back({ destination, filter });
+        return Good;
     }
     
     // Sets the set of accepting states.
