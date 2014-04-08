@@ -63,6 +63,16 @@ int main(int argc, const char * argv[])
     number_nfa.add_transition(6, digit, 6);
     number_nfa.set_accepting_states({3, 6});
     
+    // A test dfa
+    CharDFA test_dfa;
+    test_dfa.add_transition(0, alpha, 1);
+    test_dfa.add_transition(1, digit, 1);
+    test_dfa.add_transition(1, CharFilter('0'), 2);
+    test_dfa.set_accepting_states({ 2 });
+    
+    std::cout << std::endl;
+    std::cout << test_dfa.graphviz("test_dfa") << std::endl;
+    
     // Automata can be visualized by graphviz
     std::cout << std::endl;
     std::cout << number_nfa.graphviz("number_nfa") << std::endl;

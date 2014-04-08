@@ -43,6 +43,8 @@ private:
     StateSet _accepting_states;
     
 public:
+    DFA() {}
+    
     // DFAs can only be created from a NFA.
     DFA(NFA<Action> const& nfa) {
         struct TmpState {
@@ -85,6 +87,42 @@ public:
             }
             current++;
         }
+    }
+    
+    // Adds or extends an existing transition. In case of a conflict with a pre
+    // existing transition, only the non conflicting parts of the filter will
+    // be inserted.
+    void add_transition(State source,
+                        Filter filter,
+                        State destination) {
+        if (filter.empty()) {
+            return;
+        }
+        Transitions& transitions = _transition_table[source];
+        
+        // check for conflicts
+        for (Transition& t : transitions) {
+            if (t.destination != destination && intersecting(t.filter, filter)) {
+                filter -= t.filter; // TODO: Some warning would be nice...
+            }
+        }
+        if (filter.empty()) {
+            return;
+        }
+        
+        // add transition
+        for (Transition& t : transitions) {
+            if (t.destination == destination) {
+                t.filter += filter;
+                return;
+            }
+        }
+        transitions.push_back({ destination, filter });
+    }
+    
+    // Sets the set of accepting states.
+    void set_accepting_states(StateSet const& accepting_states) {
+        _accepting_states = accepting_states;
     }
     
     // Finds the state reachable by the action. If no such state exists, the
